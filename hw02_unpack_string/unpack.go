@@ -12,7 +12,6 @@ func Unpack(str string) (string, error) {
 	var backslash bool
 	sr := []rune(str)
 	var count int
-	var s string
 	var strResult strings.Builder
 
 	for i, item := range sr {
@@ -39,12 +38,13 @@ func Unpack(str string) (string, error) {
 			continue
 		}
 
+		if i < len(sr)-1 && unicode.IsDigit(sr[i+1]) && int(sr[i+1]-'0') == 0 {
+			continue
+		}
+
 		if unicode.IsDigit(item) {
 			count = int(item - '0')
 			if count == 0 {
-				s = strResult.String()[:len(strResult.String())-1]
-				strResult.Reset()
-				strResult.WriteString(s)
 				continue
 			}
 			strResult.WriteString(strings.Repeat(string(sr[i-1]), count-1))
