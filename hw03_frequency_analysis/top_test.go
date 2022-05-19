@@ -43,6 +43,13 @@ var text = `Как видите, он  спускается  по  лестни�
 	посидеть у огня и послушать какую-нибудь интересную сказку.
 		В этот вечер...`
 
+var text2 = `Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+	sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+	Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut 
+	aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate 
+	velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non 
+	proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
+
 func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
@@ -63,6 +70,19 @@ func TestTop10(t *testing.T) {
 				"не",        // 4
 			}
 			require.Equal(t, expected, Top10(text))
+			expected2 := []string{
+				"in",
+				"ut",
+				"dolor",
+				"dolore",
+				"ad",
+				"adipiscing",
+				"aliqua",
+				"aliquip",
+				"amet",
+				"anim",
+			}
+			require.Equal(t, expected2, Top10(text2))
 		} else {
 			expected := []string{
 				"он",        // 8
@@ -79,4 +99,26 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+}
+
+// for taskWithAsteriskIsCompleted
+func TestTop10OneString(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{input: "cat dog  Dog Cat ", expected: []string{"cat", "dog"}},
+		{input: "cat, dog!  Dog!!! Cat ", expected: []string{"cat", "dog"}},
+		{input: "cat  my  dog ,   Dog Cat ", expected: []string{"cat", "dog", "my"}},
+		{input: " once - ", expected: []string{"once"}},
+		{input: "ногу нога Нога ноги! ногу ноги, ногааа, ножка, Нога!", expected: []string{"нога", "ноги", "ногу", "ногааа", "ножка"}},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result := Top10(tc.input)
+			require.Equal(t, tc.expected, result)
+		})
+	}
 }
