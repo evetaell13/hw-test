@@ -101,7 +101,6 @@ func TestTop10(t *testing.T) {
 	})
 }
 
-// for taskWithAsteriskIsCompleted
 func TestTop10OneString(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -110,10 +109,9 @@ func TestTop10OneString(t *testing.T) {
 		{input: "cat dog  Dog Cat ", expected: []string{"cat", "dog"}},
 		{input: "cat, dog!  Dog!!! Cat ", expected: []string{"cat", "dog"}},
 		{input: "cat  my  dog ,   Dog Cat ", expected: []string{"cat", "dog", "my"}},
+		{input: "ногу нога Нога ноги! ногу ноги, ножка, Нога!", expected: []string{"нога", "ноги", "ногу", "ножка"}},
 		{input: " once - ", expected: []string{"once"}},
-		{input: "ногу нога Нога ноги! ногу ноги, ногааа, ножка, Нога!", expected: []string{"нога", "ноги", "ногу", "ногааа", "ножка"}},
 	}
-
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.input, func(t *testing.T) {
