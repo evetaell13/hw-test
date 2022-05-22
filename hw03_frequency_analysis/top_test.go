@@ -1,9 +1,9 @@
 package hw03frequencyanalysis
 
 import (
-	"testing"
-
 	"github.com/stretchr/testify/require"
+	"strings"
+	"testing"
 )
 
 // Change to true if needed.
@@ -119,4 +119,36 @@ func TestTop10OneString(t *testing.T) {
 			require.Equal(t, tc.expected, result)
 		})
 	}
+}
+
+func Test15Words133Times(t *testing.T) {
+	ts := []string{}
+	var ch rune = 97
+	j, i := 0, 0
+	for j <= 15 {
+		for i < 133 {
+			ts = append(ts, string(ch))
+			i++
+		}
+		ch++
+		j++
+		i = 0
+	}
+	ts = append(ts, "doom", "morrowind", "iddqd", "idkfa", "arcanum")
+	testString := strings.Join(ts, " ")
+	t.Run("test 133", func(t *testing.T) {
+		expected := []string{
+			"a",
+			"b",
+			"c",
+			"d",
+			"e",
+			"f",
+			"g",
+			"h",
+			"i",
+			"j",
+		}
+		require.Equal(t, expected, Top10(testString))
+	})
 }

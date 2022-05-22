@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var re = regexp.MustCompile(`[[:punct:]]`)
+var re = regexp.MustCompile(`[^0-9А-Яа-яA-za-z_]`)
 
 func Top10(str string) []string {
 	var result []string
@@ -25,7 +25,6 @@ func Top10(str string) []string {
 		}
 		dict[word]++
 	}
-
 	keys := make([]string, 0, len(dict))
 	values := make([]int, 0, len(dict))
 	for k, v := range dict {
