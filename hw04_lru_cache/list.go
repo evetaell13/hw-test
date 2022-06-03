@@ -29,13 +29,13 @@ func (l *list) Back() *ListItem {
 }
 
 func (l *list) PushFront(v interface{}) *ListItem {
-	var elem *ListItem
+	elem := &ListItem{Prev: nil, Value: v}
 	if l.len == 0 {
-		elem = &ListItem{Next: nil, Prev: nil, Value: v}
+		elem.Next = nil
 		l.head = elem
 		l.tail = elem
 	} else {
-		elem = &ListItem{Next: l.head, Prev: nil, Value: v}
+		elem.Next = l.head
 		l.head.Prev = elem
 		l.head = elem
 	}
@@ -44,13 +44,13 @@ func (l *list) PushFront(v interface{}) *ListItem {
 }
 
 func (l *list) PushBack(v interface{}) *ListItem {
-	var elem *ListItem
+	elem := &ListItem{Next: nil, Value: v}
 	if l.len == 0 {
-		elem = &ListItem{Next: nil, Prev: nil, Value: v}
+		elem.Prev = nil
 		l.head = elem
 		l.tail = elem
 	} else {
-		elem = &ListItem{Next: nil, Prev: l.tail, Value: v}
+		elem.Prev = l.tail
 		l.tail.Next = elem
 		l.tail = elem
 	}
@@ -58,23 +58,18 @@ func (l *list) PushBack(v interface{}) *ListItem {
 	return elem
 }
 
-//крайние случаи
 func (l *list) Remove(i *ListItem) {
+	elemPrev := i.Prev
 	if i == l.head {
 		l.head = l.head.Next
-		l.len--
-		return
-	}
-	elemPrev := i.Prev
-	if i == l.tail {
+	} else if i == l.tail {
 		elemPrev.Next = nil
 		l.tail = elemPrev
-		l.len--
-		return
+	} else {
+		elemNext := i.Next
+		elemPrev.Next = elemNext
+		elemNext.Prev = elemPrev
 	}
-	elemNext := i.Next
-	elemPrev.Next = elemNext
-	elemNext.Prev = elemPrev
 	l.len--
 }
 
