@@ -32,6 +32,7 @@ func NewCache(capacity int) Cache {
 }
 
 // добавлениe элемента кеша
+
 func (c *lruCache) Set(key Key, value interface{}) bool {
 	c.lck.Lock()
 	defer c.lck.Unlock()
@@ -42,7 +43,8 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 		return true
 	}
 	// если элемента нет в словаре, то добавить в словарь и в начало очереди
-	// (при этом, если размер очереди больше ёмкости кэша, то необходимо удалить последний элемент из очереди и его значение из словаря);
+	// (при этом, если размер очереди больше ёмкости кэша, то необходимо
+	//	удалить последний элемент из очереди и его значение из словаря)
 	if c.queue.Len() == c.capacity {
 		c.purge()
 	}
@@ -58,8 +60,9 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 }
 
 // получение элемента кеша
-// - если элемент присутствует в словаре, то переместить элемент в начало очереди и вернуть его значение и true;
-// - если элемента нет в словаре, то вернуть nil и false
+// если элемент присутствует в словаре, то переместить элемент в начало очереди и вернуть его значение и true;
+// если элемента нет в словаре, то вернуть nil и false
+
 func (c *lruCache) Get(key Key) (interface{}, bool) {
 	c.lck.Lock()
 	defer c.lck.Unlock()
@@ -72,6 +75,7 @@ func (c *lruCache) Get(key Key) (interface{}, bool) {
 }
 
 // выталкивание последнего элемента кэша
+
 func (c *lruCache) purge() {
 	if element := c.queue.Back(); element != nil {
 		item := element.Value.(*cacheItem)
@@ -81,6 +85,7 @@ func (c *lruCache) purge() {
 }
 
 // очистка кэша
+
 func (c *lruCache) Clear() {
 	c.lck.Lock()
 	defer c.lck.Unlock()

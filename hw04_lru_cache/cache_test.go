@@ -68,7 +68,7 @@ func TestCache(t *testing.T) {
 		c.Get("bbb")           // bbb вперед
 		c.Set("ccc", 30)       // ccc вперед
 		c.Set("mmm", 130)      // mmm новое
-		val, ok = c.Get("ddd") //ddd вытолкнуло за давностью
+		val, ok = c.Get("ddd") // ddd вытолкнуло за давностью
 		require.False(t, ok)
 		require.Nil(t, val)
 	})
@@ -82,10 +82,10 @@ func TestCache(t *testing.T) {
 		c.Clear()
 		_, ok = c.Get("vvv")
 		require.False(t, ok)
-		cap := c.(*lruCache).capacity
-		len := c.(*lruCache).queue.Len()
-		require.Equal(t, 0, len)
-		require.Equal(t, 1, cap)
+		capLRU := c.(*lruCache).capacity
+		lenLRU := c.(*lruCache).queue.Len()
+		require.Equal(t, 0, lenLRU)
+		require.Equal(t, 1, capLRU)
 	})
 }
 

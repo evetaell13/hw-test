@@ -61,35 +61,37 @@ func (l *list) PushBack(v interface{}) *ListItem {
 func (l *list) Remove(i *ListItem) {
 	elemPrev := i.Prev
 	elemNext := i.Next
+	l.len--
 	if elemPrev == nil {
 		l.head = l.head.Next
-	} else if elemNext == nil {
+		return
+	}
+	if elemNext == nil {
 		elemPrev.Next = nil
 		l.tail = elemPrev
-	} else {
-		elemPrev.Next = elemNext
-		elemNext.Prev = elemPrev
+		return
 	}
-	l.len--
+	elemPrev.Next = elemNext
+	elemNext.Prev = elemPrev
 }
 
 func (l *list) MoveToFront(i *ListItem) {
 	elemPrev := i.Prev
-	elemNext := i.Next
 	if elemPrev == nil {
 		return
 	}
 	i.Prev = nil
+	elemNext := i.Next
 	i.Next = l.head
 	l.head = i
 	if elemNext == nil {
 		elemPrev.Next = nil
 		l.tail = elemPrev
-	} else {
-		elemNext = i.Next
-		elemPrev.Next = elemNext
-		elemNext.Prev = elemPrev
+		return
 	}
+	elemNext = i.Next
+	elemPrev.Next = elemNext
+	elemNext.Prev = elemPrev
 }
 
 type ListItem struct {
