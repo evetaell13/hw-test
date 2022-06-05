@@ -1,5 +1,7 @@
 package hw04lrucache
 
+import "sync"
+
 type Key string
 
 type Cache interface {
@@ -12,6 +14,7 @@ type lruCache struct {
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
+	lck      *sync.Mutex
 }
 
 type cacheItem struct {
@@ -24,11 +27,14 @@ func NewCache(capacity int) Cache {
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
+		lck:      new(sync.Mutex),
 	}
 }
 
 // добавлениe элемента кеша
 func (c *lruCache) Set(key Key, value interface{}) bool {
+	c.lck.Lock()
+	defer c.lck.Unlock()
 	// если элемент присутствует в словаре, то обновить его значение и переместить элемент в начало очереди;
 	if element, exists := c.items[key]; exists {
 		c.queue.MoveToFront(element)
@@ -48,7 +54,6 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 
 	element := c.queue.PushFront(cacheItem)
 	c.items[cacheItem.key] = element
-
 	return false
 }
 
@@ -56,6 +61,8 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 // - если элемент присутствует в словаре, то переместить элемент в начало очереди и вернуть его значение и true;
 // - если элемента нет в словаре, то вернуть nil и false
 func (c *lruCache) Get(key Key) (interface{}, bool) {
+	c.lck.Lock()
+	defer c.lck.Unlock()
 	element, exists := c.items[key]
 	if !exists {
 		return nil, false
@@ -75,6 +82,8 @@ func (c *lruCache) purge() {
 
 // очистка кэша
 func (c *lruCache) Clear() {
+	c.lck.Lock()
+	defer c.lck.Unlock()
 	c.queue = NewList()
 	c.items = make(map[Key]*ListItem, c.capacity)
 }
