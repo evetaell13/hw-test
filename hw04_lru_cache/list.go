@@ -10,6 +10,90 @@ type List interface {
 	MoveToFront(i *ListItem)
 }
 
+func (l *list) Len() int {
+	return l.len
+}
+
+func (l *list) Front() *ListItem {
+	if l.len == 0 {
+		return nil
+	}
+	return l.head
+}
+
+func (l *list) Back() *ListItem {
+	if l.len == 0 {
+		return nil
+	}
+	return l.tail
+}
+
+func (l *list) PushFront(v interface{}) *ListItem {
+	elem := &ListItem{Prev: nil, Value: v}
+	if l.len == 0 {
+		elem.Next = nil
+		l.head = elem
+		l.tail = elem
+	} else {
+		elem.Next = l.head
+		l.head.Prev = elem
+		l.head = elem
+	}
+	l.len++
+	return elem
+}
+
+func (l *list) PushBack(v interface{}) *ListItem {
+	elem := &ListItem{Next: nil, Value: v}
+	if l.len == 0 {
+		elem.Prev = nil
+		l.head = elem
+		l.tail = elem
+	} else {
+		elem.Prev = l.tail
+		l.tail.Next = elem
+		l.tail = elem
+	}
+	l.len++
+	return elem
+}
+
+func (l *list) Remove(i *ListItem) {
+	elemPrev := i.Prev
+	elemNext := i.Next
+	l.len--
+	if elemPrev == nil {
+		l.head = l.head.Next
+		return
+	}
+	if elemNext == nil {
+		elemPrev.Next = nil
+		l.tail = elemPrev
+		return
+	}
+	elemPrev.Next = elemNext
+	elemNext.Prev = elemPrev
+}
+
+func (l *list) MoveToFront(i *ListItem) {
+	elemPrev := i.Prev
+	if elemPrev == nil {
+		return
+	}
+	i.Prev = nil
+	elemNext := i.Next
+	i.Next = l.head
+	l.head = i
+	if elemNext == nil {
+		elemPrev.Next = nil
+		l.tail = elemPrev
+		return
+	}
+	elemNext = i.Next
+	elemPrev.Next = elemNext
+	elemNext.Prev = elemPrev
+}
+
 type ListItem struct {
 	Value interface{}
 	Next  *ListItem
@@ -17,8 +101,9 @@ type ListItem struct {
 }
 
 type list struct {
-	List // Remove me after realization.
-	// Place your code here.
+	head *ListItem
+	tail *ListItem
+	len  int
 }
 
 func NewList() List {

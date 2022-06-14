@@ -50,12 +50,47 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		// логика выталкивания: из-за переполнения
+		c := NewCache(3)
+		c.Set("aaa", 100)
+		val, ok := c.Get("aaa")
+		require.True(t, ok)
+		require.Equal(t, 100, val)
+		c.Set("bbb", 200)
+		c.Set("ccc", 300)
+		c.Set("ddd", 400)
+		val, ok = c.Get("aaa")
+		require.False(t, ok)
+		require.Nil(t, val)
+		// логика выталкивания: давно используемые элементы
+		c.Set("bbb", 50)       // bbb вперед
+		c.Get("ccc")           // ссс вперед
+		c.Get("bbb")           // bbb вперед
+		c.Set("ccc", 30)       // ccc вперед
+		c.Set("mmm", 130)      // mmm новое
+		val, ok = c.Get("ddd") // ddd вытолкнуло за давностью
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("clear logic", func(t *testing.T) {
+		c := NewCache(1)
+		c.Set("vvv", 200)
+		val, ok := c.Get("vvv")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+		c.Clear()
+		_, ok = c.Get("vvv")
+		require.False(t, ok)
+		capLRU := c.(*lruCache).capacity
+		lenLRU := c.(*lruCache).queue.Len()
+		require.Equal(t, 0, lenLRU)
+		require.Equal(t, 1, capLRU)
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
+	// t.Skip() // Remove me if task with asterisk completed.
 
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
