@@ -36,6 +36,10 @@ func TestRun(t *testing.T) {
 
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
+
+		maxErrorsCount = 0
+		err = Run(tasks, workersCount, maxErrorsCount)
+		require.Equal(t, err, ErrErrorsLimitExceeded)
 	})
 
 	t.Run("tasks without errors", func(t *testing.T) {
@@ -66,5 +70,26 @@ func TestRun(t *testing.T) {
 
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
+
+		maxErrorsCount = 4
+		err = Run(tasks, workersCount, maxErrorsCount)
+		require.NoError(t, err)
+
+		tasksCount = 10
+		tasks1 := make([]Task, 0, tasksCount)
+		workersCount = 15
+
+		for i := 0; i < tasksCount; i++ {
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(100))
+			sumTime += taskSleep
+
+			tasks1 = append(tasks1, func() error {
+				time.Sleep(taskSleep)
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+		err = Run(tasks1, workersCount, maxErrorsCount)
+		require.NoError(t, err)
 	})
 }
