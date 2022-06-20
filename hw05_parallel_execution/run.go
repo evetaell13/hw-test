@@ -10,51 +10,59 @@ var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
-func Run(tasks []Task, n, m int) error {
-	// максимум 0 ошибок
-	if m <= 0 {
+func Run(tasks []Task, n int, m int) error {
+	if m == 0 {
 		return ErrErrorsLimitExceeded
 	}
-	wg := sync.WaitGroup{}
-	mu := sync.Mutex{}
-	var errCount int
+
+	doneCh := make(chan error, len(tasks))
+	defer close(doneCh)
+
 	taskCh := make(chan Task, len(tasks))
+	for _, task := range tasks {
+		taskCh <- task
+	}
+	close(taskCh)
+
+	var isError bool
+	mu := sync.Mutex{}
+
+	wg := sync.WaitGroup{}
+
+	defer wg.Wait()
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			for {
-				select {
-				case t := <-taskCh:
-					if t == nil {
-						return
-					}
-					if errCount <= m {
-						if t() != nil {
-							mu.Lock()
-							errCount++
-							mu.Unlock()
-						}
-					} else {
-						return
-					}
-				default:
-					return
+			for task := range taskCh {
+				mu.Lock()
+				if isError {
+					mu.Unlock()
+					break
 				}
+				mu.Unlock()
+
+				doneCh <- task()
 			}
 		}()
 	}
 
-	for i := range tasks {
-		taskCh <- tasks[i]
-	}
+	var totalErrors int
+	var err error
+	for i := 0; i < len(tasks); i++ {
+		err = <-doneCh
+		if err != nil {
+			totalErrors++
+		}
 
-	close(taskCh)
+		if totalErrors == m {
+			mu.Lock()
+			isError = true
+			mu.Unlock()
 
-	wg.Wait()
-	if errCount > m {
-		return ErrErrorsLimitExceeded
+			return ErrErrorsLimitExceeded
+		}
 	}
 
 	return nil
