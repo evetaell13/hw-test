@@ -32,6 +32,10 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrUnsupportedFile
 	}
 
+	if limit == 0 {
+		limit = statFileFrom.Size()
+	}
+
 	fileFrom.Seek(offset, 0)
 	diff := statFileFrom.Size() - offset
 	var bytesLen int64
