@@ -28,7 +28,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return err
 	case offset > statFileFrom.Size():
 		return ErrOffsetExceedsFileSize
-	case statFileFrom.Size() == 0:
+	case !statFileFrom.Mode().IsRegular():
 		return ErrUnsupportedFile
 	}
 
