@@ -49,7 +49,7 @@ func (v ValidationErrors) Error() string {
 	return strErrors.String()
 }
 
-func Validate(v interface{}) (sliceErrs []ValidationError) { //nolint:gocognit
+func Validate(v interface{}) (sliceErrs []ValidationError) {
 	val := reflect.ValueOf(v)
 
 	// интерфейс не структура
@@ -91,32 +91,8 @@ func Validate(v interface{}) (sliceErrs []ValidationError) { //nolint:gocognit
 				}
 			}
 		case reflect.Slice:
-			fieldKind := field.Index(0).Kind()
-
-			switch fieldKind { //nolint:exhaustive
-			case reflect.Int:
-				sl := field.Interface().([]int)
-				for _, item := range sl {
-					for tagKey, tagVal := range rules {
-						err := ValidateInt(item, tagKey, tagVal)
-						if err != nil {
-							vr := ValidationError{Field: fieldName, Err: err}
-							sliceErrs = append(sliceErrs, vr)
-						}
-					}
-				}
-			case reflect.String:
-				sl := field.Interface().([]string)
-				for _, item := range sl {
-					for tagKey, tagVal := range rules {
-						err := ValidateString(item, tagKey, tagVal)
-						if err != nil {
-							vr := ValidationError{Field: fieldName, Err: err}
-							sliceErrs = append(sliceErrs, vr)
-						}
-					}
-				}
-			}
+			errs := GetReflectSlice(field, fieldName, rules)
+			sliceErrs = append(sliceErrs, errs...)
 		default:
 			continue
 		}
@@ -211,4 +187,36 @@ func getValidateRules(s string) map[string]string {
 	}
 
 	return rules
+}
+
+func GetReflectSlice(field reflect.Value, fieldName string, rules map[string]string) []ValidationError {
+	sliceErrs := make([]ValidationError, 0)
+	fieldKind := field.Index(0).Kind()
+
+	switch fieldKind { //nolint:exhaustive
+	case reflect.Int:
+		sl := field.Interface().([]int)
+		for _, item := range sl {
+			for tagKey, tagVal := range rules {
+				err := ValidateInt(item, tagKey, tagVal)
+				if err != nil {
+					vr := ValidationError{Field: fieldName, Err: err}
+					sliceErrs = append(sliceErrs, vr)
+				}
+			}
+		}
+	case reflect.String:
+		sl := field.Interface().([]string)
+		for _, item := range sl {
+			for tagKey, tagVal := range rules {
+				err := ValidateString(item, tagKey, tagVal)
+				if err != nil {
+					vr := ValidationError{Field: fieldName, Err: err}
+					sliceErrs = append(sliceErrs, vr)
+				}
+			}
+		}
+	}
+
+	return sliceErrs
 }
