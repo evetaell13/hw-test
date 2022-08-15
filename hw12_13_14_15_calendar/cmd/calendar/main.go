@@ -20,7 +20,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/configs/config.toml", "Path to configuration file")
 }
 
 func main() {
@@ -31,7 +31,7 @@ func main() {
 		return
 	}
 
-	config := NewConfig(configFile)
+	config := CreateNewConfig(configFile)
 	logg := logger.New(config.Logger.Level)
 
 	var storage app.Storage

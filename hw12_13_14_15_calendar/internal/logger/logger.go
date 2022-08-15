@@ -19,6 +19,7 @@ type Logger struct { // TODO
 }
 
 func New(level string) *Logger {
+	var l int
 	switch strings.ToLower(level) {
 	case "error":
 		l = levelError

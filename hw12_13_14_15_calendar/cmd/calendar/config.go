@@ -28,7 +28,7 @@ type LoggerConf struct {
 	Level string
 }
 
-func NewConfig(filename string) *Config {
+func CreateNewConfig(filename string) *Config {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Println(err)
