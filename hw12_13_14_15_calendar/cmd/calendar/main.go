@@ -20,7 +20,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/configs/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "./configs/config.toml", "Path to configuration file")
 }
 
 func main() {
@@ -32,7 +32,7 @@ func main() {
 	}
 
 	config := CreateNewConfig(configFile)
-	logg := logger.New(config.Logger.Level)
+	logr := logger.New(config.Logger.Level)
 
 	var storage app.Storage
 
@@ -40,24 +40,24 @@ func main() {
 	case "inmemory":
 		d, err := memorystorage.New(config.Database.FilePath)
 		if err != nil {
-			logg.Error(fmt.Sprint("create inmemory: ", err))
+			logr.Error(fmt.Sprint("create inmemory: ", err))
 			os.Exit(1)
 		}
 		storage = d
 	case "pg":
 		db, err := sqlstorage.New() // TODO args
 		if err != nil {
-			logg.Error(fmt.Sprint("create sqlstorage: ", err))
+			logr.Error(fmt.Sprint("create sqlstorage: ", err))
 			os.Exit(1)
 		}
 		storage = db
 	default:
-		logg.Error(fmt.Sprint("unsupport DBimplement: ", config.Database.DBimplement))
+		logr.Error(fmt.Sprint("unsupport DBimplement: ", config.Database.DBimplement))
 		os.Exit(1)
 	}
-	calendar := app.New(logg, storage)
+	calendar := app.New(logr, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(logr, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -70,14 +70,14 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			logr.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	logr.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
+		logr.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}

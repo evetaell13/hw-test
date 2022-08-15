@@ -3,6 +3,7 @@ package memorystorage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +11,14 @@ import (
 	"time"
 
 	"github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/storage"
+)
+
+var (
+	ErrDateBusy          = errors.New("this date already busy")
+	ErrCantConnectToDB   = errors.New("can't connect to database")
+	ErrNotNullNewObjID   = errors.New("not null new object id")
+	ErrNullUpdateObjID   = errors.New("null update object id")
+	ErrNotFoundUpdateObj = errors.New("not found update obj")
 )
 
 type Storage struct {
@@ -100,7 +109,7 @@ func (s *Storage) WriteEvent(event storage.Event) error {
 	if event.ID == "" {
 		s.arrays.Events = append(s.arrays.Events, event)
 	} else {
-		return storage.ErrNotNullNewObjID
+		return ErrNotNullNewObjID
 	}
 	// TODO check user ID
 	return nil
@@ -112,7 +121,7 @@ func (s *Storage) WriteUser(user storage.User) error {
 	if user.ID == "" {
 		s.arrays.Users = append(s.arrays.Users, user)
 	} else {
-		return storage.ErrNotNullNewObjID
+		return ErrNotNullNewObjID
 	}
 	return nil
 }
@@ -128,9 +137,9 @@ func (s *Storage) UpdateEvent(event storage.Event) error {
 			}
 		}
 	} else {
-		return storage.ErrNotNullNewObjID
+		return ErrNotNullNewObjID
 	}
-	return storage.ErrNotFoundUpdateObj
+	return ErrNotFoundUpdateObj
 }
 
 func (s *Storage) UpdateUser(user storage.User) error {
@@ -144,7 +153,7 @@ func (s *Storage) UpdateUser(user storage.User) error {
 			}
 		}
 	} else {
-		return storage.ErrNullUpdateObjID
+		return ErrNullUpdateObjID
 	}
-	return storage.ErrNotFoundUpdateObj
+	return ErrNotFoundUpdateObj
 }
