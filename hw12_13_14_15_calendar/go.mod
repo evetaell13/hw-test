@@ -1,3 +1,8 @@
 module github.com/fixme_my_friend/hw12_13_14_15_calendar
 
 go 1.16
+
+require (
+	github.com/naoina/go-stringutil v0.1.0 // indirect
+	github.com/naoina/toml v0.1.1 // indirect
+)

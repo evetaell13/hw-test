@@ -3,15 +3,18 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/app"
+	"github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/evetaell13/hw-test/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -28,10 +31,30 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
+	config := NewConfig(configFile)
 	logg := logger.New(config.Logger.Level)
 
-	storage := memorystorage.New()
+	var storage app.Storage
+
+	switch strings.ToLower(config.Database.DBimplement) {
+	case "inmemory":
+		d, err := memorystorage.New(config.Database.FilePath)
+		if err != nil {
+			logg.Error(fmt.Sprint("create inmemory: ", err))
+			os.Exit(1)
+		}
+		storage = d
+	case "pg":
+		db, err := sqlstorage.New() // TODO args
+		if err != nil {
+			logg.Error(fmt.Sprint("create sqlstorage: ", err))
+			os.Exit(1)
+		}
+		storage = db
+	default:
+		logg.Error(fmt.Sprint("unsupport DBimplement: ", config.Database.DBimplement))
+		os.Exit(1)
+	}
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar)
