@@ -1,5 +1,11 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[database]
+dbimplement = "inmemory"
+filepath = "configs/memory.json"
+server = "localhost"
+port = 5432
+user = "test"
+password = "iddqd"
+
